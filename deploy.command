@@ -123,7 +123,7 @@ elif [ "$application" -eq "2" ]; then
 	# Android
 
 	# Check if an android application actually exists for this project
-	if [ -d ${dir}/$extension"/"$extension"_android/" ]; then
+	if ! [ -d ${dir}/$extension"/"$extension"_android/" ]; then
 		echo "-------------------------------------------------------------------"
 		echo "                    ${red}Invalid input"
 		read asdfasdf
@@ -164,7 +164,7 @@ elif [ "$application" -eq "3" ]; then
 	# iOS
 
 	# Check that an iOS Application exists for the project
-	if [ -d ${dir}/$extension"/"$extension"_ios/" ]; then
+	if ! [ -d ${dir}/$extension"/"$extension"_ios/" ]; then
 		echo "-------------------------------------------------------------------"
 		echo "                    ${red}Invalid input"
 		read asdfasdf
