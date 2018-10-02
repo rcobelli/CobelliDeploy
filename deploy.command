@@ -96,12 +96,21 @@ if [ "$application" -eq "1" ]; then
 	read -p "${blue}Is error repoting disabled? (Y/N)${reset} " errorChecking
 
 
-	if [ "$errorChecking" = "N"]; then
+	if [ "$errorChecking" = "N" ]; then
 		# Wrap it up
 		echo "-------------------------------------------------------------------"
 		echo "                    ${red}Go disable error reporting"
 		read asdfasdf
 		exit 0
+	fi
+
+	echo "-------------------------------------------------------------------"
+	read -p "${blue}Is this a major release? (Y/N)${reset} " majorRelease
+
+
+	if [ "$majorRelease" = "Y" ]; then
+		# Create a trello ticket to remind me to write an update blog post
+		eval "trello \"Write blog for $extension\""
 	fi
 
 	# Ask for the git commit message

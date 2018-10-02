@@ -26,8 +26,10 @@ root_dir="a_b_c"
 The script will do the following:
   1. Run a PHP linter
   2. Confirm that debug statements are turned off
-  3. Create a git commit
-  4. Push to remote 
+  3. Ask if this is a major release
+    - If it is, it will create a Trello ticket for PR purposes
+  4. Create a git commit
+  5. Push to remote 
 
 
 ### Android
