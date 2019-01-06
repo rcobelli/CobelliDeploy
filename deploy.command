@@ -10,12 +10,15 @@ reset=`tput sgr0`
 # Find the working directory
 dir=$(dirname "$0")
 
+# Stop execution when a command fails
+set -e
+
 # Header
 echo "+-----------------------------------------------------------------+"
 echo "|                    ${bold}Cobelli Deployment System${reset}                    |"
 echo "+-------+----------------------------------------------------------"
 
-# Loop through everything in the sites directory
+# Loop through everything in the current directory
 count=1
 for file in ${dir}/*; do
 	if ! [ ! -f $file"/"config.ini ]; then
@@ -110,7 +113,7 @@ if [ "$application" -eq "1" ]; then
 
 	if [ "$majorRelease" = "Y" ]; then
 		# Create a trello ticket to remind me to write an update blog post
-		eval "trello \"Write blog for $extension\""
+		eval "trello \"Write blog post for $extension\""
 	fi
 
 	# Ask for the git commit message
@@ -162,7 +165,7 @@ elif [ "$application" -eq "2" ]; then
 	eval "git push --tags"
 
 	# Create a trello ticket to remind me to write an update blog post
-	eval "trello \"Write blog for $extension\""
+	eval "trello \"Write blog post for $extension\""
 
 	# Wrap it up
 	echo "-------------------------------------------------------------------"
@@ -191,8 +194,6 @@ elif [ "$application" -eq "3" ]; then
 	# This determines which lane is run
 	read -p "${blue}Is this a (B)eta or (R)elease build?${reset} " buildType
 
-	echo "-------------------------------------------------------------------"
-
 	# Release builds only
 	if [ "$buildType" = "R" ]; then
 		# Prompt if the user wants to run imageoptim
@@ -207,6 +208,17 @@ elif [ "$application" -eq "3" ]; then
 			eval "imageoptim '**/*.jpg' '**/*.jpeg' '**/*.png'"
 		fi
 	fi
+
+    # Release builds only
+    if [ "$buildType" = "R" ]; then
+        read -p "${blue}Do you want to generate screenshots (Y/N)?${reset} " snapshot
+
+        if [ "$snapshot" = "Y" ]; then
+            eval "bundle exec fastlane snapshot"
+        fi
+    fi
+
+	echo "-------------------------------------------------------------------"
 
 	# Move back out to where it can find fastlane
 	cd ${dir}/$extension/$extension"_ios"
@@ -240,7 +252,7 @@ elif [ "$application" -eq "3" ]; then
 
 	# Create a trello ticket to remind me to write an update blog post
 	if [ "$buildType" = "R" ]; then
-		eval "trello \"Write blog for $extension\""
+		eval "trello \"Write blog post for $extension\""
 	fi
 
 	# Wrap it up
