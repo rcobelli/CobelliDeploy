@@ -43,14 +43,16 @@ The script will do the following:
   1. Update [Fastlane](https://github.com/fastlane)
   2. (Optionally) Run [ImageOptim](https://imageoptim.com)
   3. (Optionally) Generate screenshots (using Fastlane)
-  4. Download existing meta data from the App Store (using Fastlane)
-  5. Ask for your change log (will be displayed on the App Store)
-  6. Run your Fastlane lanes (either beta or release builds)
-  7. Create a git commit using the version number _(ex: 5)_
-  8. Create a tag with the version name _(ex: 1.2.3)_
-  9. Push to remote
+  4. (Optionally) Update the `acknowledgements.plist` in `Settings.bundle` (from CocoaPods)
+  5. Download existing meta data from the App Store (using Fastlane)
+  6. Ask for your change log (will be displayed on the App Store)
+  7. Run your Fastlane lanes (either beta or release builds)
+  8. Create a git commit using the version number _(ex: 5)_
+  9. Create a tag with the version name _(ex: 1.2.3)_
+  10. Push to remote
 
 
 ## TODO
   - Add support for Mac applications
-  - Build the signed APK for android directly from the CLI (maybe using fastlane)
+  - Build the signed APK for android directly from the CLI
+  - Version backend applications
