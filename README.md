@@ -33,11 +33,12 @@ link="https://link-to-download.com"
 The script will simply open SourceTree
 
 ### Android
-The script will do the following:
-  1. Analyze the already created release APK
-  2. Create a git commit using the version number _(ex: 5)_
-  3. Create a tag with the version name _(ex: 1.2.3)_
-  4. Push to remote
+  1. Update [Fastlane](https://github.com/fastlane)
+  2. (Optionally) Run [ImageOptim](https://imageoptim.com)
+  3. Run your Fastlane lanes (either beta or release builds)
+  4. Create a git commit using the version number _(ex: 5)_
+  5. Create a tag with the version name _(ex: 1.2.3)_
+  6. Push to remote
 
 ### iOS
   1. Update [Fastlane](https://github.com/fastlane)
@@ -54,5 +55,3 @@ The script will do the following:
 
 ## TODO
   - Add support for Mac applications
-  - Build the signed APK for android directly from the CLI
-  - Version backend applications

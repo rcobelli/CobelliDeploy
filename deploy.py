@@ -7,7 +7,7 @@ import time
 import json
 import requests
 import subprocess
-
+from shutil import copyfile
 
 def ios():
     # Check if it has fastlane setup
@@ -52,7 +52,11 @@ def ios():
     os.system("bundle exec fastlane deliver download_metadata -force")
 
     # Save the changelog as the release notes
-    os.system(changeLog + " > fastlane/metadata/en-US/release_notes.txt")
+    os.system("echo '" + changeLog + "' > fastlane/metadata/en-US/release_notes.txt")
+
+    # Update the acknowledgements file (if Settings.bundle exists)
+    if answers['releaseType'] == 'release' and os.path.isdir("Settings.bundle"):
+        copyfile("Pods/Target Support Files/Pods-" + projectCode + "/Pods-" + projectCode + "-acknowledgements.plist", "Settings.bundle/Acknowledgements.plist")
 
     # Run the correct lane
     os.system("bundle exec fastlane " + answers['releaseType'])
@@ -67,13 +71,40 @@ def ios():
     os.system("git push")
 
 def android():
-    # TODO: Build the signed APK with gradle
+    # Check if it has fastlane setup
+    if not os.path.exists("fastlane/Fastfile"):
+        sys.exit("Fastlane not installed")
+
+    os.system("git status")
+
+    print("-------------------------------------------------------------------")
+    # Ask for change log
+    changeLog = input("Change Log: ")
+
+    questions = [
+        inquirer.List('releaseType',
+                      message="What type of release is this?",
+                      choices=[('Release', 'release'), ('Beta', 'beta')],
+                  ),
+        inquirer.Confirm('imageOptim',
+                         message="Do you want to run ImageOptim?" ,
+                         default=False),
+    ]
+    answers = inquirer.prompt(questions)
+
+    # Update fastlane
+    os.system("bundle update fastlane")
+
+    if answers['imageOptim']:
+        os.system("imageoptim '**/*.jpg '**/*.jpeg' '**/*.png'")
+
+    os.system("rm -rf app/build/outputs/")
+
+    # Run the correct lane
+    os.system("bundle exec fastlane " + answers['releaseType'])
 
     versionName = os.popen("bundletool dump manifest --bundle app/release/app-release.aab --xpath /manifest/@android:versionName").read()
     versionNum = os.popen("bundletool dump manifest --bundle app/release/app-release.aab --xpath /manifest/@android:versionCode").read()
-
-    # Ask for change log
-    changeLog = input("Change Log: ")
 
     os.system("git add .")
     os.system("git commit -am '" + str(versionNum) + ": " + str(changeLog) + "'")
@@ -84,6 +115,7 @@ def backend():
     subprocess.call(
         ["/usr/bin/open", "-W", "-n", "-a", "/Applications/SourceTree.app"]
     )
+    os.exit(0)
 
 # Init
 configMaster = configparser.ConfigParser()
