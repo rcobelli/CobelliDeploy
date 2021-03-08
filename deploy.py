@@ -31,6 +31,9 @@ def ios():
         inquirer.Confirm('screenshots',
                          message="Do you want to generate screenshots?" ,
                          default=False),
+        inquirer.Confirm('pods',
+                         message="Would you like to update CocoaPods?" ,
+                         default=True),
     ]
     answers = inquirer.prompt(questions)
 
@@ -43,6 +46,9 @@ def ios():
     if answers['screenshots']:
         os.system("bundle exec fastlane snapshot update --force")
         os.system("bundle exec fastlane snapshot")
+
+    if answers['pods']:
+        os.system("/usr/local/bin/pod update")
 
     # Remove old build artifacts
     os.system("rm -f *.dSYM.zip")
