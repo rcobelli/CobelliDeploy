@@ -109,13 +109,15 @@ def android():
     # Run the correct lane
     os.system("bundle exec fastlane " + answers['releaseType'])
 
-    versionName = os.popen("bundletool dump manifest --bundle app/release/app-release.aab --xpath /manifest/@android:versionName").read()
-    versionNum = os.popen("bundletool dump manifest --bundle app/release/app-release.aab --xpath /manifest/@android:versionCode").read()
+    versionName = os.popen("bundletool dump manifest --bundle app/build/outputs/bundle/release/app-release.aab --xpath /manifest/@android:versionName").read()
+    versionNum = os.popen("bundletool dump manifest --bundle app/build/outputs/bundle/release/app-release.aab --xpath /manifest/@android:versionCode").read()
 
     os.system("git add .")
     os.system("git commit -am '" + str(versionNum) + ": " + str(changeLog) + "'")
     os.system("git tag " + versionName)
     os.system("git push")
+
+    print("DO NOT FORGET TO ADD RELEASE NOTES VIA THE GOOGLE PLAY CONSOLE")
 
 def backend():
     subprocess.call(
