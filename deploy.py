@@ -106,6 +106,10 @@ def android():
 
     os.system("rm -rf app/build/outputs/")
 
+
+    # Save the changelog as the release notes
+    os.system("echo '" + changeLog + "' > fastlane/metadata/en-US/changelogs/default.txt")
+
     # Run the correct lane
     os.system("bundle exec fastlane " + answers['releaseType'])
 
@@ -116,8 +120,6 @@ def android():
     os.system("git commit -am '" + str(versionNum) + ": " + str(changeLog) + "'")
     os.system("git tag " + versionName)
     os.system("git push")
-
-    print("DO NOT FORGET TO ADD RELEASE NOTES VIA THE GOOGLE PLAY CONSOLE")
 
 def backend():
     subprocess.call(
