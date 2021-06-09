@@ -25,30 +25,18 @@ def ios():
                       message="What type of release is this?",
                       choices=[('Release', 'release'), ('Beta', 'beta')],
                   ),
-        inquirer.Confirm('imageOptim',
-                         message="Do you want to run ImageOptim?" ,
-                         default=False),
         inquirer.Confirm('screenshots',
                          message="Do you want to generate screenshots?" ,
                          default=False),
-        inquirer.Confirm('pods',
-                         message="Would you like to update CocoaPods?" ,
-                         default=True),
     ]
     answers = inquirer.prompt(questions)
 
     # Update fastlane
     os.system("bundle update fastlane")
 
-    if answers['imageOptim']:
-        os.system("imageoptim '**/*.jpg '**/*.jpeg' '**/*.png'")
-
     if answers['screenshots']:
         os.system("bundle exec fastlane snapshot update --force")
         os.system("bundle exec fastlane snapshot")
-
-    if answers['pods']:
-        os.system("/usr/local/bin/pod update")
 
     # Remove old build artifacts
     os.system("rm -f *.dSYM.zip")
@@ -92,20 +80,14 @@ def android():
                       message="What type of release is this?",
                       choices=[('Release', 'release'), ('Beta', 'beta')],
                   ),
-        inquirer.Confirm('imageOptim',
-                         message="Do you want to run ImageOptim?" ,
-                         default=False),
     ]
     answers = inquirer.prompt(questions)
 
     # Update fastlane
     os.system("bundle update fastlane")
 
-    if answers['imageOptim']:
-        os.system("imageoptim '**/*.jpg '**/*.jpeg' '**/*.png'")
-
+    # Remove old build artifacts
     os.system("rm -rf app/build/outputs/")
-
 
     # Save the changelog as the release notes
     os.system("echo '" + changeLog + "' > fastlane/metadata/en-US/changelogs/default.txt")
@@ -125,7 +107,6 @@ def backend():
     subprocess.call(
         ["/usr/bin/open", "-W", "-n", "-a", "/Applications/SourceTree.app"]
     )
-    os.exit(0)
 
 # Init
 configMaster = configparser.ConfigParser()
