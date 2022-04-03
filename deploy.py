@@ -9,12 +9,16 @@ import requests
 import subprocess
 from shutil import copyfile
 
+def exec(command):
+    if (os.system(command) != 0):
+        raise Exception(command + " did not complete successfully")
+
 def ios():
     # Check if it has fastlane setup
     if not os.path.exists("fastlane/Fastfile"):
         sys.exit("Fastlane not installed")
 
-    os.system("git status")
+    exec("git status")
 
     print("-------------------------------------------------------------------")
     # Ask for change log
@@ -32,44 +36,41 @@ def ios():
     answers = inquirer.prompt(questions)
 
     # Update fastlane
-    os.system("bundle update fastlane")
+    exec("bundle update fastlane")
 
     if answers['screenshots']:
-        os.system("bundle exec fastlane snapshot update --force")
-        os.system("bundle exec fastlane snapshot")
+        exec("bundle exec fastlane snapshot update --force")
+        exec("bundle exec fastlane snapshot")
 
     # Remove old build artifacts
-    os.system("rm -f *.dSYM.zip")
-    os.system("rm -f *.ipa")
-
-    # Download existing metadata from the store
-    os.system("bundle exec fastlane deliver download_metadata -force")
+    exec("rm -f *.dSYM.zip")
+    exec("rm -f *.ipa")
 
     # Save the changelog as the release notes
-    os.system("echo '" + changeLog + "' > fastlane/metadata/en-US/release_notes.txt")
+    exec("echo '" + changeLog + "' > fastlane/metadata/en-US/release_notes.txt")
 
     # Update the acknowledgements file (if Settings.bundle exists)
     if answers['releaseType'] == 'release' and os.path.isdir("Settings.bundle"):
         copyfile("Pods/Target Support Files/Pods-" + projectCode + "/Pods-" + projectCode + "-acknowledgements.plist", "Settings.bundle/Acknowledgements.plist")
 
     # Run the correct lane
-    os.system("bundle exec fastlane " + answers['releaseType'])
+    exec("bundle exec fastlane " + answers['releaseType'])
 
     # Get the version and build numbers
     buildNum = os.popen("agvtool what-version -terse").read()
     buildVers = os.popen("xcodebuild -showBuildSettings 2> /dev/null | grep MARKETING_VERSION | tr -d 'MARKETING_VERSION =' ").read()
 
-    os.system("git add .")
-    os.system("git commit -am '" + buildNum + ": " + changeLog + "'")
-    os.system("git tag " + buildVers)
-    os.system("git push")
+    exec("git add .")
+    exec("git commit -am '" + buildNum + ": " + changeLog + "'")
+    exec("git tag " + buildVers)
+    exec("git push")
 
 def android():
     # Check if it has fastlane setup
     if not os.path.exists("fastlane/Fastfile"):
         sys.exit("Fastlane not installed")
 
-    os.system("git status")
+    exec("git status")
 
     print("-------------------------------------------------------------------")
     # Ask for change log
@@ -84,24 +85,24 @@ def android():
     answers = inquirer.prompt(questions)
 
     # Update fastlane
-    os.system("bundle update fastlane")
+    exec("bundle update fastlane")
 
     # Remove old build artifacts
-    os.system("rm -rf app/build/outputs/")
+    exec("rm -rf app/build/outputs/")
 
     # Save the changelog as the release notes
-    os.system("echo '" + changeLog + "' > fastlane/metadata/en-US/changelogs/default.txt")
+    exec("echo '" + changeLog + "' > fastlane/metadata/android/en-US/changelogs/default.txt")
 
     # Run the correct lane
-    os.system("bundle exec fastlane " + answers['releaseType'])
+    exec("bundle exec fastlane " + answers['releaseType'])
 
     versionName = os.popen("bundletool dump manifest --bundle app/build/outputs/bundle/release/app-release.aab --xpath /manifest/@android:versionName").read()
     versionNum = os.popen("bundletool dump manifest --bundle app/build/outputs/bundle/release/app-release.aab --xpath /manifest/@android:versionCode").read()
 
-    os.system("git add .")
-    os.system("git commit -am '" + str(versionNum) + ": " + str(changeLog) + "'")
-    os.system("git tag " + versionName)
-    os.system("git push")
+    exec("git add .")
+    exec("git commit -am '" + str(versionNum) + ": " + str(changeLog) + "'")
+    exec("git tag " + versionName)
+    exec("git push")
 
 def backend():
     subprocess.call(
