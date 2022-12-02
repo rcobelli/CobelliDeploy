@@ -84,20 +84,16 @@ def android():
     ]
     answers = inquirer.prompt(questions)
 
-    # Update fastlane
-    exec("bundle update fastlane")
-
-    # Remove old build artifacts
-    exec("rm -rf app/build/outputs/")
-
     # Save the changelog as the release notes
     exec("echo '" + changeLog + "' > fastlane/metadata/android/en-US/changelogs/default.txt")
 
-    # Run the correct lane
-    exec("bundle exec fastlane " + answers['releaseType'])
+    # Run fastlane
+    # exec("bundle update fastlane")
+    # exec("rm -rf app/build/outputs/")
+    # exec("bundle exec fastlane " + answers['releaseType'])
 
-    versionName = os.popen("bundletool dump manifest --bundle app/build/outputs/bundle/release/app-release.aab --xpath /manifest/@android:versionName").read()
-    versionNum = os.popen("bundletool dump manifest --bundle app/build/outputs/bundle/release/app-release.aab --xpath /manifest/@android:versionCode").read()
+    versionName = os.popen("bundletool dump manifest --bundle app/release/app-release.aab --xpath /manifest/@android:versionName").read()
+    versionNum = os.popen("bundletool dump manifest --bundle app/release/app-release.aab --xpath /manifest/@android:versionCode").read()
 
     exec("git add .")
     exec("git commit -am '" + str(versionNum) + ": " + str(changeLog) + "'")
