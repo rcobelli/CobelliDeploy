@@ -36,6 +36,7 @@ def ios():
     answers = inquirer.prompt(questions)
 
     # Update fastlane
+    exec("gem update")
     exec("bundle update fastlane")
 
     if answers['screenshots']:
@@ -81,19 +82,27 @@ def android():
                       message="What type of release is this?",
                       choices=[('Release', 'release'), ('Beta', 'beta')],
                   ),
+        inquirer.Confirm('screenshots',
+                         message="Do you want to generate screenshots?" ,
+                         default=False),
     ]
     answers = inquirer.prompt(questions)
+
+    # Update fastlane
+    exec("gem update")
+    exec("bundle update fastlane")
 
     # Save the changelog as the release notes
     exec("echo '" + changeLog + "' > fastlane/metadata/android/en-US/changelogs/default.txt")
 
-    # Run fastlane
-    # exec("bundle update fastlane")
-    # exec("rm -rf app/build/outputs/")
-    # exec("bundle exec fastlane " + answers['releaseType'])
+    if answers['screenshots']:
+        exec("bundle exec fastlane build_and_screengrab")
 
-    versionName = os.popen("bundletool dump manifest --bundle app/release/app-release.aab --xpath /manifest/@android:versionName").read()
-    versionNum = os.popen("bundletool dump manifest --bundle app/release/app-release.aab --xpath /manifest/@android:versionCode").read()
+    # Run the correct lane
+    exec("bundle exec fastlane " + answers['releaseType'])
+
+    versionName = os.popen("bundletool dump manifest --bundle app/build/outputs/bundle/regularRelease/app-regular-release.aab --xpath /manifest/@android:versionName").read()
+    versionNum = os.popen("bundletool dump manifest --bundle app/build/outputs/bundle/regularRelease/app-regular-release.aab --xpath /manifest/@android:versionCode").read()
 
     exec("git add .")
     exec("git commit -am '" + str(versionNum) + ": " + str(changeLog) + "'")
