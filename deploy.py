@@ -3,15 +3,14 @@ import os
 import configparser
 import inquirer
 import sys
-import time
-import json
-import requests
 import subprocess
 from shutil import copyfile
+
 
 def exec(command):
     if (os.system(command) != 0):
         raise Exception(command + " did not complete successfully")
+
 
 def ios():
     # Check if it has fastlane setup
@@ -28,9 +27,9 @@ def ios():
         inquirer.List('releaseType',
                       message="What type of release is this?",
                       choices=[('Release', 'release'), ('Beta', 'beta')],
-                  ),
+                      ),
         inquirer.Confirm('screenshots',
-                         message="Do you want to generate screenshots?" ,
+                         message="Do you want to generate screenshots?",
                          default=False),
     ]
     answers = inquirer.prompt(questions)
@@ -52,19 +51,22 @@ def ios():
 
     # Update the acknowledgements file (if Settings.bundle exists)
     if answers['releaseType'] == 'release' and os.path.isdir("Settings.bundle"):
-        copyfile("Pods/Target Support Files/Pods-" + projectCode + "/Pods-" + projectCode + "-acknowledgements.plist", "Settings.bundle/Acknowledgements.plist")
+        copyfile("Pods/Target Support Files/Pods-" + projectCode + "/Pods-" +
+                 projectCode + "-acknowledgements.plist", "Settings.bundle/Acknowledgements.plist")
 
     # Run the correct lane
     exec("bundle exec fastlane " + answers['releaseType'])
 
     # Get the version and build numbers
     buildNum = os.popen("agvtool what-version -terse").read()
-    buildVers = os.popen("xcodebuild -showBuildSettings 2> /dev/null | grep MARKETING_VERSION | tr -d 'MARKETING_VERSION =' ").read()
+    buildVers = os.popen(
+        "xcodebuild -showBuildSettings 2> /dev/null | grep MARKETING_VERSION | tr -d 'MARKETING_VERSION =' ").read()
 
     exec("git add .")
     exec("git commit -am '" + buildNum + ": " + changeLog + "'")
     exec("git tag " + buildVers)
     exec("git push")
+
 
 def android():
     # Check if it has fastlane setup
@@ -81,9 +83,9 @@ def android():
         inquirer.List('releaseType',
                       message="What type of release is this?",
                       choices=[('Release', 'release'), ('Beta', 'beta')],
-                  ),
+                      ),
         inquirer.Confirm('screenshots',
-                         message="Do you want to generate screenshots?" ,
+                         message="Do you want to generate screenshots?",
                          default=False),
     ]
     answers = inquirer.prompt(questions)
@@ -93,7 +95,8 @@ def android():
     exec("bundle update fastlane")
 
     # Save the changelog as the release notes
-    exec("echo '" + changeLog + "' > fastlane/metadata/android/en-US/changelogs/default.txt")
+    exec("echo '" + changeLog +
+         "' > fastlane/metadata/android/en-US/changelogs/default.txt")
 
     if answers['screenshots']:
         exec("bundle exec fastlane build_and_screengrab")
@@ -101,18 +104,22 @@ def android():
     # Run the correct lane
     exec("bundle exec fastlane " + answers['releaseType'])
 
-    versionName = os.popen("bundletool dump manifest --bundle app/build/outputs/bundle/regularRelease/app-regular-release.aab --xpath /manifest/@android:versionName").read()
-    versionNum = os.popen("bundletool dump manifest --bundle app/build/outputs/bundle/regularRelease/app-regular-release.aab --xpath /manifest/@android:versionCode").read()
+    versionName = os.popen(
+        "bundletool dump manifest --bundle app/build/outputs/bundle/regularRelease/app-regular-release.aab --xpath /manifest/@android:versionName").read()
+    versionNum = os.popen(
+        "bundletool dump manifest --bundle app/build/outputs/bundle/regularRelease/app-regular-release.aab --xpath /manifest/@android:versionCode").read()
 
     exec("git add .")
     exec("git commit -am '" + str(versionNum) + ": " + str(changeLog) + "'")
     exec("git tag " + versionName)
     exec("git push")
 
+
 def backend():
     subprocess.call(
         ["/usr/bin/open", "-W", "-n", "-a", "/Applications/SourceTree.app"]
     )
+
 
 # Init
 configMaster = configparser.ConfigParser()
@@ -126,12 +133,23 @@ print("+------------------------------------------------------------------")
 
 # Figure out if this is a Rybel or Personal project
 questions = [
-  inquirer.List('type',
-                message="Select a type",
-                choices=[tuple(("Personal", "personal")), tuple(("Rybel", "clients"))],
-            ),
+    inquirer.List('type',
+                  message="Select a type",
+                  choices=[tuple(("Personal", "personal")),
+                           tuple(("Rybel", "clients"))],
+                  ),
 ]
 projectType = inquirer.prompt(questions)['type']
+
+if projectType == "clients":
+    # Client projects use AWS CodeCommit and CLI creds for src access
+    questions = [
+        inquirer.Text('profile', message="What AWS profile should be used?"),
+    ]
+    awsProfile = inquirer.prompt(questions)['profile']
+    exec ('aws sso login --profile ' + awsProfile)
+
+
 os.chdir(projectType)
 
 # Loop through all directories in project folder
@@ -150,10 +168,10 @@ for i in os.listdir('.'):
 projects.sort()
 
 questions = [
-  inquirer.List('project',
-                message="Select a project",
-                choices=projects,
-            ),
+    inquirer.List('project',
+                  message="Select a project",
+                  choices=projects,
+                  ),
 ]
 
 # Save the selected project code
@@ -174,10 +192,10 @@ if os.path.isdir("backend"):
 
 if len(applications) == 0:
     questions = [
-      inquirer.List('application',
-                    message="Select application type",
-                    choices=["ios", "backend", "android"],
-                ),
+        inquirer.List('application',
+                      message="Select application type",
+                      choices=["ios", "backend", "android"],
+                      ),
     ]
 
     # Save the selected application code
@@ -186,10 +204,10 @@ elif len(applications) == 1:
     applicationCode = applications[0][1]
 else:
     questions = [
-      inquirer.List('application',
-                    message="Select an application",
-                    choices=applications,
-                ),
+        inquirer.List('application',
+                      message="Select an application",
+                      choices=applications,
+                      ),
     ]
 
     # Save the selected application code
