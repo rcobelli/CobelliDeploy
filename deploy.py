@@ -141,15 +141,6 @@ questions = [
 ]
 projectType = inquirer.prompt(questions)['type']
 
-if projectType == "clients":
-    # Client projects use AWS CodeCommit and CLI creds for src access
-    questions = [
-        inquirer.Text('profile', message="What AWS profile should be used?"),
-    ]
-    awsProfile = inquirer.prompt(questions)['profile']
-    exec ('aws sso login --profile ' + awsProfile)
-
-
 os.chdir(projectType)
 
 # Loop through all directories in project folder
@@ -180,6 +171,13 @@ projectCode = inquirer.prompt(questions)['project']
 # Move into that project's directory
 os.chdir(projectCode)
 
+# Get AWS profile name for project
+if projectType == "clients" and projectCode != "website":
+    awsProfile = projectCode
+else:
+    awsProfile = "default"
+
+exec('aws sso login --profile ' + awsProfile)
 
 # Loop through all directories in project folder
 applications = []
