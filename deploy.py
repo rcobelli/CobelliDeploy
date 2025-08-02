@@ -125,37 +125,17 @@ def backend():
 configMaster = configparser.ConfigParser()
 
 # Move to all projects dir
-os.chdir("/Users/" + getpass.getuser() + "/Sites")
+os.chdir("/Users/" + getpass.getuser() + "/Developer/clients")
 
 print("+-----------------------------------------------------------------+")
 print("|                    Cobelli Deployment System                    |")
 print("+------------------------------------------------------------------")
 
-# Figure out if this is a Rybel or Personal project
-questions = [
-    inquirer.List('type',
-                  message="Select a type",
-                  choices=[tuple(("Personal", "personal")),
-                           tuple(("Rybel", "clients"))],
-                  ),
-]
-projectType = inquirer.prompt(questions)['type']
-
-os.chdir(projectType)
-
 # Loop through all directories in project folder
 projects = []
 for i in os.listdir('.'):
     if os.path.isdir(i):
-        if projectType == "rybel":
-            configMaster.read(i + "/config.ini")
-            config = configMaster[i]
-
-            title = config['title'].strip("\"")
-
-            projects.append(title)
-        else:
-            projects.append(i)
+        projects.append(i)
 projects.sort()
 
 questions = [
@@ -170,14 +150,6 @@ projectCode = inquirer.prompt(questions)['project']
 
 # Move into that project's directory
 os.chdir(projectCode)
-
-# Get AWS profile name for project
-if projectType == "clients" and projectCode != "website":
-    awsProfile = projectCode
-else:
-    awsProfile = "default"
-
-exec('aws sso login --profile ' + awsProfile)
 
 # Loop through all directories in project folder
 applications = []
